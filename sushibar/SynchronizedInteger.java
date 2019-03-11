@@ -24,4 +24,7 @@ public class SynchronizedInteger {
         return c;
     }
 
+    public String toString() {
+    	return Integer.toString(this.c);
+    }
 }

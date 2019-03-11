@@ -21,18 +21,12 @@ public class Door implements Runnable {
     @Override
     public void run() {
         while (SushiBar.isOpen) {
-        	//TODO Try adding new customer to waitingArea at given intervalls. Make sure it's synchronized
-        	//TODO Add the random intervalls
-        	if (!this.waitingArea.isFull()) {
-        		this.waitingArea.enter(new Customer());
-        		this.notifyAll(); //Varsle servitører om at ny kunde har kommet inn i tilfelle noen står og venter
-        	} else {
+        	if (this.waitingArea.enter(new Customer())) {
         		try {
-					this.wait(); //TODO Riktig bruk av wait? Bekymret for at den kanskje 'waiter' Door istedenfor Door sin tilgang på waitingArea
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+    				Thread.sleep((long) (SushiBar.doorWait * Math.random()));
+    			} catch (InterruptedException e) {
+    				e.printStackTrace();
+    			}
         	}
         }
     }

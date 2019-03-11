@@ -1,4 +1,5 @@
 package sushibar;
+import java.util.LinkedList;
 import java.util.Queue;
 
 /**
@@ -6,7 +7,7 @@ import java.util.Queue;
  */
 public class WaitingArea {
 	
-	private Queue<Customer> customerQueue;
+	private Queue<Customer> customerQueue = new LinkedList<Customer>();
 	private int size;
 
     /**
@@ -24,11 +25,19 @@ public class WaitingArea {
      * @param customer A customer created by Door, trying to enter the waiting area
      */
     public synchronized boolean enter(Customer customer) {
-    	if (this.isFull()) {    		
+    	if (!this.isFull()) {    		
     		this.customerQueue.add(customer);
+    		SushiBar.write(Thread.currentThread().getName() + ": Customer" + "Customer" + customer.getCustomerID()+ " is now waiting");
+    		this.notifyAll();
     		return true;
+    	} else {
+    		try {
+    			this.wait();
+    		} catch (InterruptedException e) {
+    			e.printStackTrace();
+    		}
+    		return false;    		
     	}
-    	return false;
     }
 
     /**
@@ -36,13 +45,24 @@ public class WaitingArea {
      */
     public synchronized Customer next() {
     	if (!this.isEmpty()) {
-    		return this.customerQueue.remove();    		
+    		this.notifyAll();
+    		return this.customerQueue.remove();
+    	} else {
+    		try {
+				this.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    		return null;
     	}
-    	return null;
+    	
     }
     
     public synchronized boolean isEmpty() {
-    	return this.customerQueue.isEmpty();
+    	if (this.customerQueue.isEmpty()) {
+    		return true;
+    	}
+    	return false;
     }
     
     public synchronized boolean isFull() {
